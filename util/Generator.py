@@ -1,9 +1,16 @@
+from util.Display import Display
+
+
 class Generator:
     def __init__(self) -> None:
         self.temporal = 0
         self.label = 0
         self.code = list()
         self.temps = list()
+        self.display = Display()
+
+    def getDisplayPtr(self) -> None:
+        return self.display.content[self.display.display_ptr]
 
     def getCode(self) -> list[str]:
         return self.code
@@ -78,4 +85,104 @@ class Generator:
         self.addGoto(l1)
         self.addLabel(l2)
         self.code.append("return;")
-        self.code.append("}")
+        self.code.append("}\n")
+
+    def addPrintTrue(self) -> None:
+        self.code.append("void printTrue() {")
+        self.addPrintf("c", "116")
+        self.addPrintf("c", "114")
+        self.addPrintf("c", "117")
+        self.addPrintf("c", "101")
+        self.code.append("return;")
+        self.code.append("}\n")
+
+    def addPrintFalse(self) -> None:
+        self.code.append("void printFalse() {")
+        self.addPrintf("c", "102")
+        self.addPrintf("c", "97")
+        self.addPrintf("c", "108")
+        self.addPrintf("c", "115")
+        self.addPrintf("c", "101")
+        self.code.append("return;")
+        self.code.append("}\n")
+
+    def addModule(self) -> None:
+        self.code.append("void module() {")
+        t1 = self.newTemp()
+        self.addExpression(t1, "P", "1", "+")
+        t2 = self.newTemp()
+        self.addGetStack(t2, t1)
+        t3 = self.newTemp()
+        self.addExpression(t3, "P", "2", "+")
+        t4 = self.newTemp()
+        self.addGetStack(t4, t3)
+        label1 = self.newLabel()
+        self.addLabel(label1)
+        label2 = self.newLabel()
+        self.addIf(t2, "0", "<", label2)
+        self.addExpression(t2, t2, t4, "-")
+        self.addGoto(label1)
+        self.addLabel(label2)
+        self.addExpression(t2, t2, t4, "+")
+        self.addSetStack("P", t2)
+        self.code.append("return;")
+        self.code.append("}\n")
+
+    def addAbsolute(self):
+        self.code.append("void absolute() {")
+        t1 = self.newTemp()
+        self.addExpression(t1, "P", "1", "+")
+        t2 = self.newTemp()
+        self.addGetStack(t2, t1)
+        label1 = self.newLabel()
+        label2 = self.newLabel()
+        self.addIf(t2, "0", "<", label1)
+        self.addGoto(label2)
+        t3 = self.newTemp()
+        self.addLabel(label1)
+        self.addAsignation(t3, "-1")
+        self.addExpression(t2, t2, t3, "*")
+        self.addLabel(label2)
+        self.addSetStack("P", t2)
+        self.code.append("return;")
+        self.code.append("}\n")
+
+    def addSquareRoot(self):
+        self.code.append("void squareRoot() {")
+        t1 = self.newTemp()
+        t2 = self.newTemp()
+        t3 = self.newTemp()
+        t4 = self.newTemp()
+        t5 = self.newTemp()
+        t6 = self.newTemp()
+        t7 = self.newTemp()
+        t8 = self.newTemp()
+        t9 = self.newTemp()
+        label1 = self.newLabel()
+        label2 = self.newLabel()
+        label3 = self.newLabel()
+        self.addExpression(t1, "P", "1", "+")
+        self.addGetStack(t2, t1)
+        self.addAsignation(t4, "1")
+        self.addExpression(t4, t4, "1000000000000", "/")
+        self.addExpression(t3, t2, "2", "/")
+        self.addAsignation(t8, t3)
+        self.addExpression(t5, t8, t8, "*")
+        self.addExpression(t5, t5, t2, "-")
+        self.addExpression(t6, "2", t3, "*")
+        self.addLabel(label1)
+        self.addExpression(t7, "", t4, "-")
+        self.addIf(t7, t5, ">=", label2)
+        self.addIf(t5, t4, ">=", label2)
+        self.addGoto(label3)
+        self.addLabel(label2)
+        self.addExpression(t9, t5, t6, "/")
+        self.addExpression(t8, t8, t9, "-")
+        self.addExpression(t5, t8, t8, "*")
+        self.addExpression(t5, t5, t2, "-")
+        self.addExpression(t6, "2", t3, "*")
+        self.addGoto(label1)
+        self.addLabel(label3)
+        self.addSetStack("P", t8)
+        self.code.append("return;")
+        self.code.append("}\n")

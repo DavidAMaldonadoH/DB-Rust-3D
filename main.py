@@ -36,6 +36,11 @@ class MainWindow(QMainWindow):
         generator = Generator()
 
         generator.addImprimir()
+        generator.addPrintFalse()
+        generator.addPrintTrue()
+        generator.addModule()
+        generator.addAbsolute()
+        generator.addSquareRoot()
 
         for node in ast:
             node.execute(g_scope, generator)

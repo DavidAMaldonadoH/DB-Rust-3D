@@ -71,7 +71,19 @@ class Operation(Expression):
                 )
                 ERRORS_.append(err)
                 return
-            generator.addExpression(new_temp, left_value, right_op.value, self.operator)
+            if self.operator == "%":
+                t1 = generator.newTemp()
+                generator.addExpression(t1, "P", "1", "+")
+                generator.addSetStack(t1, left_value)
+                t2 = generator.newTemp()
+                generator.addExpression(t2, "P", "2", "+")
+                generator.addSetStack(t2, right_op.value)
+                generator.addCall("module")
+                generator.addGetStack(new_temp, "P")
+            else:
+                generator.addExpression(
+                    new_temp, left_value, right_op.value, self.operator
+                )
             return Value(new_temp, True, right_op.type, "", "")
         else:
             dominant_type = REL_TYPE[left_op.type.value][right_op.type.value]

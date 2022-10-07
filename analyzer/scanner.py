@@ -51,8 +51,14 @@ reserved = {
     "as": "RAS",
     "if": "RIF",
     "else": "RELSE",
-    "println": "RPRINTLN",
+    "while": "RWHILE",
+    "loop": "RLOOP",
+    "break": "RBREAK",
+    "continue": "RCONTINUE",
     "fn": "RFN",
+    "println": "RPRINTLN",
+    "abs": "RABS",
+    "sqrt": "RSQRT",
 }
 
 tokens += list(reserved.values())

@@ -1,18 +1,24 @@
 import ply.yacc as yacc
 
 from analyzer.scanner import tokens
+from expression.Abs import Abs
 from expression.Cast import Cast
 from expression.Logic import Logic
 from expression.Operation import Operation
 from expression.Literal import Literal
 from expression.SimpleAccess import SimpleAccess
+from expression.Sqrt import Sqrt
 from expression.ToString import ToString
 from instruction.Assignation import Assignation
+from instruction.Break import Break
+from instruction.Continue import Continue
 from instruction.Declaration import Declaration
 from instruction.FunctionDeclaration import FunctionDeclaration
 from instruction.If import If
+from instruction.Loop import Loop
 from instruction.Println import Println
 from instruction.Statement import Statement
+from instruction.While import While
 from util.Types import Type
 
 
@@ -50,6 +56,10 @@ def p_instruction(p):
     | asignation SEMICOLON
     | println SEMICOLON
     | if_st
+    | while
+    | loop
+    | break SEMICOLON
+    | continue SEMICOLON
     | function"""
     p[0] = p[1]
 
@@ -118,6 +128,26 @@ def p_else_st(p):
         p[0] = None
 
 
+def p_while(p):
+    "while : RWHILE expression statement"
+    p[0] = While(p.lineno(1), p.lexpos(1), p[2], p[3])
+
+
+def p_loop(p):
+    "loop : RLOOP statement"
+    p[0] = Loop(p.lineno(1), p.lexpos(1), p[2])
+
+
+def p_break(p):
+    "break : RBREAK"
+    p[0] = Break(p.lineno(1), p.lexpos(1))
+
+
+def p_continue(p):
+    "continue : RCONTINUE"
+    p[0] = Continue(p.lineno(1), p.lexpos(1))
+
+
 def p_function(p):
     """function : RFN ID LPAREN RPAREN statement"""
     p[0] = FunctionDeclaration(p.lineno(1), p.lexpos(1), p[2], [], p[5], Type.Void)
@@ -140,6 +170,16 @@ def p_expressions_expression(p):
 def p_expr_cast(p):
     "expression : expression RAS primitive_type"
     p[0] = Cast(p.lineno(1), p.lexpos(1), p[1], p[3])
+
+
+def p_expr_abs(p):
+    "expression : expression DOT RABS LPAREN RPAREN"
+    p[0] = Abs(p.lineno(1), p.lexpos(1), p[1])
+
+
+def p_expr_sqrt(p):
+    "expression : expression DOT RSQRT LPAREN RPAREN"
+    p[0] = Sqrt(p.lineno(1), p.lexpos(1), p[1])
 
 
 def p_expr_uminus(p):

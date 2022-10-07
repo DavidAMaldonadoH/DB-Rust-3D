@@ -34,6 +34,8 @@ class Literal(Expression):
                 type = Type.Char
                 value = str(ord(self.value[1]))
             else:
+                if "{}" in self.value or "{:?}" in self.value:
+                    return Value(self.value, False, Type.Str, [], [])
                 type = Type.Str
                 new_temp = generator.newTemp()
                 generator.addComment("===================")
@@ -47,4 +49,4 @@ class Literal(Expression):
                 generator.addExpression("H", "H", "1", "+")
                 generator.addComment2("Final Str")
                 generator.addComment("===================")
-        return Value(value, False, type, "", "")
+        return Value(value, False, type, [], [])
