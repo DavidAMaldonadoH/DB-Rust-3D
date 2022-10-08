@@ -68,8 +68,8 @@ SUMA_TYPE: list[list[Type]] = [
         Type.Null,
         Type.Null,
         Type.Null,
-        Type.Null,
         Type.String,
+        Type.Null,
         Type.Null,
     ],
     [

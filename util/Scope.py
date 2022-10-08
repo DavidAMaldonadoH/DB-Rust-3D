@@ -25,11 +25,13 @@ class Scope:
             self = self.father
         return None
 
-    def saveVariable(self, name: str, type: Type, mutable: bool) -> Symbol:
+    def saveVariable(
+        self, name: str, type: Type, mutable: bool, line: int, col: int
+    ) -> Symbol:
         if name in self.variables:
             err = Error(
-                self.line,
-                self.column,
+                line,
+                col,
                 f"La variable {name} ya existe en el ambito {self.name}",
                 self.name,
             )

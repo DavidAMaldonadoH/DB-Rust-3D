@@ -41,17 +41,21 @@ class MainWindow(QMainWindow):
         generator.addModule()
         generator.addAbsolute()
         generator.addSquareRoot()
+        generator.addPower()
+        generator.addMathError()
+        generator.addConcatenate()
 
         for node in ast:
             node.execute(g_scope, generator)
 
         output += "#include <stdio.h>\n"
-        output += "double stack[100000];\n"
-        output += "double heap[100000];\n"
-        output += "double P;\n"
-        output += "double H;\n"
+        output += "float stack[100000];\n"
+        output += "float heap[100000];\n"
+        output += "float P;\n"
+        output += "float H;\n"
+
         if len(generator.getTemps()) > 0:
-            output += "double "
+            output += "float "
 
         for (i, tmp) in enumerate(generator.getTemps()):
             if i < len(generator.getTemps()) - 1:
@@ -62,14 +66,10 @@ class MainWindow(QMainWindow):
         if len(generator.getTemps()) > 0:
             output += ";\n\n"
 
-        # output += "void main() {"
-
         self.ui.console.append(output)
 
         for line in generator.code:
             self.ui.console.append(line)
-
-        # self.ui.console.append("\treturn;\n}\n")
 
     def setUpIcons(self):
         self.setWindowIcon(QtGui.QIcon("./assets/user-astronaut-solid.svg"))

@@ -39,6 +39,7 @@ class Println(Instruction):
                 )
                 ERRORS_.append(err)
                 return
+            isNone: bool = False
             fields = re.split(r"{}|{\:\?}", format_str.getValue())
             for i, field in enumerate(fields):
                 if i != len(fields) - 1:
@@ -59,6 +60,9 @@ class Println(Instruction):
                             generator, Value(format_str, True, Type.Str, [], [])
                         )
                     value = self.values[i + 1].execute(scope, generator)
+                    if value is None:
+                        isNone = True
+                        break
                     self.printPrimitive(scope, generator, value)
                 else:
                     if field != "":
@@ -77,6 +81,15 @@ class Println(Instruction):
                         self.printStr(
                             generator, Value(format_str, True, Type.Str, [], [])
                         )
+            if isNone:
+                err = Error(
+                    self.line,
+                    self.column,
+                    "El valor recibido no se puede imprimir",
+                    scope.name,
+                )
+                ERRORS_.append(err)
+                return
             generator.addPrintf("c", "10")
             generator.addPrintf("c", "13")
 
@@ -87,7 +100,7 @@ class Println(Instruction):
         generator.addCall("imprimir")
 
     def printPrimitive(self, scope: Scope, generator: Generator, value: Value):
-        if value.getType() == Type.I64:
+        if value.getType() == Type.I64 or value.getType() == Type.Int:
             generator.addPrintf("d", "(int)" + value.getValue())
         elif value.getType() == Type.F64:
             generator.addPrintf("f", value.getValue())

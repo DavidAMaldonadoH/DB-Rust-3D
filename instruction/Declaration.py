@@ -38,7 +38,9 @@ class Declaration(Instruction):
             )
             ERRORS_.append(err)
             return
-        variable: Symbol = scope.saveVariable(self.id, self.type, self.is_mutable)
+        variable: Symbol = scope.saveVariable(
+            self.id, self.type, self.is_mutable, self.line, self.column
+        )
         if result.type == Type.Bool:
             new_label = generator.newLabel()
             for label in result.true_label:

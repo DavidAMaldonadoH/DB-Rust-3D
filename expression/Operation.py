@@ -40,21 +40,26 @@ class Operation(Expression):
                 err = Error(
                     self.line,
                     self.column,
-                    f"El operador {self.operator} no puede ser aplicado a los tipos {left_op.type.fullname} y {right_op.type.fullname}",
+                    f"No se puede sumar `{{{right_op.type.fullname}}}` a un `{left_op.type.fullname}`",
                     scope.name,
                 )
                 ERRORS_.append(err)
                 return
-            generator.addExpression(
-                new_temp, left_op.value, right_op.value, self.operator
-            )
+            if dominant_type == Type.String:
+                t1 = generator.newTemp()
+                t2 = generator.newTemp()
+                generator.addExpression(t1, "P", "1", "+")
+                generator.addSetStack(t1, left_op.value)
+                generator.addExpression(t2, "P", "2", "+")
+                generator.addSetStack(t2, right_op.value)
+                generator.addCall("concatenate")
+                generator.addGetStack(new_temp, "P")
+            else:
+                generator.addExpression(
+                    new_temp, left_op.value, right_op.value, self.operator
+                )
             return Value(new_temp, True, left_op.type, "", "")
-        elif (
-            self.operator == "-"
-            or self.operator == "*"
-            or self.operator == "/"
-            or self.operator == "%"
-        ):
+        elif self.operator == "-" or self.operator == "*":
             new_temp = generator.newTemp()
             if self.unary:
                 dominant_type = UNARY_TYPE[right_op.type.value]
@@ -71,20 +76,80 @@ class Operation(Expression):
                 )
                 ERRORS_.append(err)
                 return
-            if self.operator == "%":
-                t1 = generator.newTemp()
-                generator.addExpression(t1, "P", "1", "+")
-                generator.addSetStack(t1, left_value)
-                t2 = generator.newTemp()
-                generator.addExpression(t2, "P", "2", "+")
-                generator.addSetStack(t2, right_op.value)
-                generator.addCall("module")
-                generator.addGetStack(new_temp, "P")
+            generator.addExpression(new_temp, left_value, right_op.value, self.operator)
+            return Value(new_temp, True, dominant_type, "", "")
+        elif self.operator == "/":
+            new_temp = generator.newTemp()
+            dominant_type = RESTO_TYPE[left_op.type.value][right_op.type.value]
+            if dominant_type == Type.Null:
+                err = Error(
+                    self.line,
+                    self.column,
+                    f"No se puede dividir `{{{right_op.type.fullname}}}` por un `{left_op.type.fullname}`",
+                    scope.name,
+                )
+                ERRORS_.append(err)
+                return
+            label1 = generator.newLabel()
+            label2 = generator.newLabel()
+            label3 = generator.newLabel()
+            generator.addIf(right_op.value, "0", "==", label1)
+            generator.addGoto(label2)
+            generator.addLabel(label1)
+            generator.addCall("mathError")
+            generator.addAsignation(new_temp, "0")
+            generator.addGoto(label3)
+            generator.addLabel(label2)
+            if dominant_type == Type.I64 or dominant_type == Type.Int:
+                generator.addExpression(
+                    new_temp, "(int)" + left_op.value, right_op.value, self.operator
+                )
             else:
                 generator.addExpression(
-                    new_temp, left_value, right_op.value, self.operator
+                    new_temp, left_op.value, right_op.value, self.operator
                 )
-            return Value(new_temp, True, right_op.type, "", "")
+            generator.addLabel(label3)
+            return Value(new_temp, True, dominant_type, "", "")
+        elif self.operator == "%":
+            new_temp = generator.newTemp()
+            dominant_type = RESTO_TYPE[left_op.type.value][right_op.type.value]
+            if dominant_type == Type.Null:
+                err = Error(
+                    self.line,
+                    self.column,
+                    f"No se puede aplicar mod `{{{right_op.type.fullname}}}` a un `{left_op.type.fullname}`",
+                    scope.name,
+                )
+                ERRORS_.append(err)
+                return
+            label1 = generator.newLabel()
+            label2 = generator.newLabel()
+            label3 = generator.newLabel()
+            generator.addIf(right_op.value, "0", "==", label1)
+            generator.addGoto(label2)
+            generator.addLabel(label1)
+            generator.addCall("mathError")
+            generator.addAsignation(new_temp, "0")
+            generator.addGoto(label3)
+            generator.addLabel(label2)
+            t1 = generator.newTemp()
+            generator.addExpression(t1, "P", "1", "+")
+            generator.addSetStack(t1, left_op.value)
+            t2 = generator.newTemp()
+            generator.addExpression(t2, "P", "2", "+")
+            generator.addSetStack(t2, right_op.value)
+            generator.addCall("module")
+            generator.addGetStack(new_temp, "P")
+            if dominant_type == Type.I64 or dominant_type == Type.Int:
+                generator.addExpression(
+                    new_temp, "(int)" + left_op.value, right_op.value, self.operator
+                )
+            else:
+                generator.addExpression(
+                    new_temp, left_op.value, right_op.value, self.operator
+                )
+            generator.addLabel(label3)
+            return Value(new_temp, True, dominant_type, "", "")
         else:
             dominant_type = REL_TYPE[left_op.type.value][right_op.type.value]
             if dominant_type == Type.Null:

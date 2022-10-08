@@ -6,6 +6,8 @@ from expression.Cast import Cast
 from expression.Logic import Logic
 from expression.Operation import Operation
 from expression.Literal import Literal
+from expression.Pow import Pow
+from expression.Reference import Reference
 from expression.SimpleAccess import SimpleAccess
 from expression.Sqrt import Sqrt
 from expression.ToString import ToString
@@ -13,6 +15,7 @@ from instruction.Assignation import Assignation
 from instruction.Break import Break
 from instruction.Continue import Continue
 from instruction.Declaration import Declaration
+from instruction.For import For
 from instruction.FunctionDeclaration import FunctionDeclaration
 from instruction.If import If
 from instruction.Loop import Loop
@@ -58,6 +61,7 @@ def p_instruction(p):
     | if_st
     | while
     | loop
+    | for
     | break SEMICOLON
     | continue SEMICOLON
     | function"""
@@ -138,6 +142,15 @@ def p_loop(p):
     p[0] = Loop(p.lineno(1), p.lexpos(1), p[2])
 
 
+def p_for_range(p):
+    """for : RFOR ID RIN expression DOT DOT expression statement
+    | RFOR ID RIN expression statement"""
+    if p[5] == ".":
+        p[0] = For(p.lineno(1), p.lexpos(1), p[2], p[4], p[7], p[8])
+    else:
+        p[0] = For(p.lineno(1), p.lexpos(1), p[2], p[4], None, p[5])
+
+
 def p_break(p):
     "break : RBREAK"
     p[0] = Break(p.lineno(1), p.lexpos(1))
@@ -180,6 +193,20 @@ def p_expr_abs(p):
 def p_expr_sqrt(p):
     "expression : expression DOT RSQRT LPAREN RPAREN"
     p[0] = Sqrt(p.lineno(1), p.lexpos(1), p[1])
+
+
+def p_expr_pow(p):
+    """expression : RPOW LPAREN expression COMMA expression RPAREN
+    | RPOWF LPAREN expression COMMA expression RPAREN"""
+    if p[1] == "pow":
+        p[0] = Pow(p.lineno(1), p.lexpos(1), p[3], p[5], Type.I64)
+    else:
+        p[0] = Pow(p.lineno(1), p.lexpos(1), p[3], p[5], Type.F64)
+
+
+def p_expr_reference(p):
+    "expression : AMPERSAND expression %prec UMINUS"
+    p[0] = Reference(p.lineno(1), p.lexpos(1), p[2])
 
 
 def p_expr_uminus(p):
