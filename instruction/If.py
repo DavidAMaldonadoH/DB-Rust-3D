@@ -5,6 +5,7 @@ from util.Generator import Generator
 from util.Instruction import Instruction
 from util.Scope import Scope
 from util.Types import Type
+from util.Symbol import Value
 
 
 class If(Instruction):
@@ -33,16 +34,26 @@ class If(Instruction):
                 label_salida = self.label
             for label in cond.true_label:
                 generator.addLabel(label)
-            self.code.execute(scope, generator)
+            retorno = self.code.execute(scope, generator)
             generator.addGoto(label_salida)
             for label in cond.false_label:
                 generator.addLabel(label)
             if self.elsest is not None:
                 if isinstance(self.elsest, If):
                     self.elsest.label = label_salida
-                self.elsest.execute(scope, generator)
+                retorno = self.elsest.execute(scope, generator)
             if self.label == "":
                 generator.addLabel(label_salida)
+            if retorno is not None:
+                new_temp = generator.newTemp()
+                generator.addGetStack(new_temp, "P")
+                return Value(
+                    new_temp,
+                    True,
+                    retorno.type,
+                    retorno.true_label,
+                    retorno.false_label,
+                )
         else:
             err = Error(
                 self.line,

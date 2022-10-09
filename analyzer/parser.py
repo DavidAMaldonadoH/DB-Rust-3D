@@ -20,6 +20,7 @@ from instruction.FunctionDeclaration import FunctionDeclaration
 from instruction.If import If
 from instruction.Loop import Loop
 from instruction.Println import Println
+from instruction.Return import Return
 from instruction.Statement import Statement
 from instruction.While import While
 from util.Types import Type
@@ -64,13 +65,40 @@ def p_instruction(p):
     | for
     | break SEMICOLON
     | continue SEMICOLON
+    | return SEMICOLON
     | function"""
     p[0] = p[1]
 
 
+def p_simple_instr(p):
+    """simple_instr : println
+    | asignation
+    | break
+    | continue
+    | return"""
+    p[0] = p[1]
+
+
+def p_simple_instr_2(p):
+    "simple_instr : empty"
+    p[0] = None
+
+
 def p_statement(p):
-    "statement : LCBRACKET instructions RCBRACKET"
+    "statement : LCBRACKET instructions simple_instr RCBRACKET"
+    if p[2] is None:
+        p[2] = []
+    if p[3] is not None:
+        p[2].append(p[3])
     p[0] = Statement(p.lineno(1), p.lexpos(1), p[2])
+
+
+def p_statement_2(p):
+    "statement : LCBRACKET simple_instr RCBRACKET"
+    if p[2] is None:
+        p[0] = Statement(p.lineno(1), p.lexpos(1), [])
+    else:
+        p[0] = Statement(p.lineno(1), p.lexpos(1), [p[2]])
 
 
 def p_primitive_type(p):
@@ -153,12 +181,31 @@ def p_for_range(p):
 
 def p_break(p):
     "break : RBREAK"
-    p[0] = Break(p.lineno(1), p.lexpos(1))
+    p[0] = Break(p.lineno(1), p.lexpos(1), None)
+
+
+def p_break_2(p):
+    "break : RBREAK expression"
+    p[0] = Break(p.lineno(1), p.lexpos(1), p[2])
 
 
 def p_continue(p):
     "continue : RCONTINUE"
     p[0] = Continue(p.lineno(1), p.lexpos(1))
+
+
+def p_return(p):
+    "return : RRETURN"
+    p[0] = Return(p.lineno(1), p.lexpos(1), None)
+
+
+def p_return_2(p):
+    """return : RRETURN expression
+    | expression"""
+    if p[1] == "return":
+        p[0] = Return(p.lineno(1), p.lexpos(1), p[2])
+    else:
+        p[0] = Return(p.lineno(1), p.lexpos(1), p[1])
 
 
 def p_function(p):
@@ -207,6 +254,12 @@ def p_expr_pow(p):
 def p_expr_reference(p):
     "expression : AMPERSAND expression %prec UMINUS"
     p[0] = Reference(p.lineno(1), p.lexpos(1), p[2])
+
+
+def p_expr_selection(p):
+    """expression : if_st
+    | loop"""
+    p[0] = p[1]
 
 
 def p_expr_uminus(p):

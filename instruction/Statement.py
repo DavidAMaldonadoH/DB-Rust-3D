@@ -18,3 +18,5 @@ class Statement(Instruction):
             retorno = instruction.execute(new_scope, generator)
         if scope.size < new_scope.size:
             generator.addExpression("P", "P", str(new_scope.size - scope.size), "-")
+        if retorno is not None:
+            return retorno

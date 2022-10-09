@@ -57,6 +57,7 @@ reserved = {
     "in": "RIN",
     "break": "RBREAK",
     "continue": "RCONTINUE",
+    "return": "RRETURN",
     "fn": "RFN",
     "println": "RPRINTLN",
     "abs": "RABS",

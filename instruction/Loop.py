@@ -2,6 +2,7 @@ from util.Error import ERRORS_, Error
 from util.Generator import Generator
 from util.Instruction import Instruction
 from util.Scope import Scope
+from util.Symbol import Value
 
 
 class Loop(Instruction):
@@ -17,7 +18,7 @@ class Loop(Instruction):
         generator.getDisplayPtr().salida = generator.newLabel()
         generator.getDisplayPtr().inicio = label_inicio
         generator.getDisplayPtr().contB = 0
-        self.code.execute(scope, generator)
+        retorno = self.code.execute(scope, generator)
         generator.addGoto(label_inicio)
         generator.addLabel(generator.getDisplayPtr().salida)
         if generator.getDisplayPtr().contB == 0:
@@ -30,3 +31,9 @@ class Loop(Instruction):
             ERRORS_.append(err)
             return
         generator.display.prevPtr()
+        if retorno is not None:
+            new_temp = generator.newTemp()
+            generator.addGetStack(new_temp, "P")
+            return Value(
+                new_temp, True, retorno.type, retorno.true_label, retorno.false_label
+            )
