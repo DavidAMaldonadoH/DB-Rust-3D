@@ -58,9 +58,9 @@ class Scope:
         while True:
             if name in self.functions:
                 return self.functions[name]
-            if self.anterior == None:
+            if self.father == None:
                 break
-            self = self.anterior
+            self = self.father
         return None
 
     def saveFunction(self, id: str, fn: Function, line: int, col: int):
@@ -75,17 +75,6 @@ class Scope:
         self.functions[id] = fn
         SYMBOLS.append(
             {
-                "name": "return",
-                "type": "Variable",
-                "type2": fn.type.fullname,
-                "scope": fn.id,
-                "position": "0",
-                "params": "",
-                "size": "1",
-            }
-        )
-        SYMBOLS.append(
-            {
                 "name": id,
                 "type": "Funcion",
                 "type2": fn.type.fullname,
@@ -93,5 +82,16 @@ class Scope:
                 "position": "-1",
                 "params": ",".join([p["name"] for p in fn.parameters]),
                 "size": str(fn.size),
+            }
+        )
+        SYMBOLS.append(
+            {
+                "name": "return",
+                "type": "Variable",
+                "type2": fn.type.fullname,
+                "scope": fn.id,
+                "position": "0",
+                "params": "",
+                "size": "1",
             }
         )

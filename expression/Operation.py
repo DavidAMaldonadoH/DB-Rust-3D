@@ -143,14 +143,14 @@ class Operation(Expression):
             generator.addSetStack(t2, right_op.value)
             generator.addCall("module")
             generator.addGetStack(new_temp, "P")
-            if dominant_type == Type.I64 or dominant_type == Type.Int:
-                generator.addExpression(
-                    new_temp, "(int)" + left_op.value, right_op.value, self.operator
-                )
-            else:
-                generator.addExpression(
-                    new_temp, left_op.value, right_op.value, self.operator
-                )
+            # if dominant_type == Type.I64 or dominant_type == Type.Int:
+            #     generator.addExpression(
+            #         new_temp, "(int)" + left_op.value, right_op.value, self.operator
+            #     )
+            # else:
+            #     generator.addExpression(
+            #         new_temp, left_op.value, right_op.value, self.operator
+            #     )
             generator.addLabel(label3)
             generator.addExpression("P", "P", str(scope.size), "-")
             return Value(new_temp, True, dominant_type, "", "")

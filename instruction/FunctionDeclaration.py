@@ -2,6 +2,7 @@ from util.Function import Function
 from util.Generator import Generator
 from util.Instruction import Instruction
 from util.Scope import Scope
+from util.Symbol import SYMBOLS
 from util.Types import Type
 
 
@@ -24,6 +25,8 @@ class FunctionDeclaration(Instruction):
         self.public = public
 
     def execute(self, scope: Scope, generator: Generator) -> any:
+        fn = Function(self.id, self.parameters, self.type, self.public, self.code.size)
+        scope.saveFunction(self.id, fn, self.line, self.column)
         generator.code.append(f"void {self.id}() {{")
         self.code.name = self.id
         self.code.size = 1
@@ -31,5 +34,8 @@ class FunctionDeclaration(Instruction):
         self.code.execute(scope, generator)
         generator.code.append("return;")
         generator.code.append("}\n")
-        fn = Function(self.id, self.parameters, self.type, self.public, self.code.size)
-        scope.saveFunction(self.id, fn, self.line, self.column)
+        scope.getFunction(self.id).size = self.code.size
+        for sym in SYMBOLS:
+            if sym["name"] == fn.id:
+                sym["size"] = str(fn.size)
+                break

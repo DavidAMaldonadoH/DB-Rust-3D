@@ -18,6 +18,7 @@ from instruction.Continue import Continue
 from instruction.Declaration import Declaration
 from instruction.Default import Default
 from instruction.For import For
+from instruction.FunctionCall import FunctionCall
 from instruction.FunctionDeclaration import FunctionDeclaration
 from instruction.If import If
 from instruction.Loop import Loop
@@ -67,6 +68,7 @@ def p_instruction(p):
     | while
     | loop
     | for
+    | function_call SEMICOLON
     | break SEMICOLON
     | continue SEMICOLON
     | return SEMICOLON
@@ -280,6 +282,31 @@ def p_arg(p):
     p[0] = {"name": p[1], "type": p[3], "mut": False}
 
 
+def p_function_call(p):
+    """function_call : ID LPAREN params RPAREN
+    | ID LPAREN RPAREN"""
+    if p[3] == ")":
+        p[0] = FunctionCall(p.lineno(1), p.lexpos(1), p[1], [])
+    else:
+        p[0] = FunctionCall(p.lineno(1), p.lexpos(1), p[1], p[3])
+
+
+def p_params_list(p):
+    "params : params COMMA param"
+    p[1].append(p[3])
+    p[0] = p[1]
+
+
+def p_params_item(p):
+    "params : param"
+    p[0] = [p[1]]
+
+
+def p_param(p):
+    """param : expression"""
+    p[0] = {"value": p[1], "mut": False}
+
+
 # =========== Expresiones ===========
 
 
@@ -339,6 +366,15 @@ def p_expr_selection(p):
     | loop
     | match"""
     p[0] = p[1]
+
+
+def p_expr_function(p):
+    """expression : ID LPAREN params RPAREN
+    | ID LPAREN RPAREN"""
+    if p[3] == ")":
+        p[0] = FunctionCall(p.lineno(1), p.lexpos(1), p[1], [])
+    else:
+        p[0] = FunctionCall(p.lineno(1), p.lexpos(1), p[1], p[3])
 
 
 def p_expr_uminus(p):
