@@ -41,17 +41,21 @@ class Declaration(Instruction):
         variable: Symbol = scope.saveVariable(
             self.id, self.type, self.is_mutable, self.line, self.column
         )
+        new_temp = generator.newTemp()
+        generator.addExpression(new_temp, "P", str(variable.position), "+")
         if result.type == Type.Bool:
             new_label = generator.newLabel()
             for label in result.true_label:
                 generator.addLabel(label)
-            generator.addSetStack("P", "1")
+            generator.addExpression(new_temp, "P", str(variable.position), "+")
+            generator.addSetStack(new_temp, "1")
             generator.addGoto(new_label)
             for label in result.false_label:
                 generator.addLabel(label)
-            generator.addSetStack("P", "0")
+            generator.addExpression(new_temp, "P", str(variable.position), "+")
+            generator.addSetStack(new_temp, "0")
             generator.addLabel(new_label)
         else:
-            generator.addSetStack("P", result.value)
-        generator.addExpression("P", "P", "1", "+")
+            generator.addSetStack(new_temp, result.value)
+        # generator.addExpression("P", "P", "1", "+")
         return result.value

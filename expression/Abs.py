@@ -31,10 +31,12 @@ class Abs(Expression):
             )
             ERRORS_.append(err)
             return
+        generator.addExpression("P", "P", str(scope.size), "+")
         new_temp = generator.newTemp()
         t1 = generator.newTemp()
         generator.addExpression(t1, "P", "1", "+")
         generator.addSetStack(t1, expr.getValue())
         generator.addCall("absolute")
         generator.addGetStack(new_temp, "P")
+        generator.addExpression("P", "P", str(scope.size), "-")
         return Value(new_temp, True, expr.getType(), [], [])

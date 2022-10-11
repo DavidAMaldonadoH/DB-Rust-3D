@@ -25,7 +25,7 @@ class Println(Instruction):
                 )
                 ERRORS_.append(err)
                 return
-            self.printStr(generator, format_str)
+            self.printStr(scope, generator, format_str)
             generator.addPrintf("c", "10")
             generator.addPrintf("c", "13")
         else:
@@ -57,7 +57,7 @@ class Println(Instruction):
                         generator.addComment2("Final Str")
                         generator.addComment("===================")
                         self.printStr(
-                            generator, Value(format_str, True, Type.Str, [], [])
+                            scope, generator, Value(format_str, True, Type.Str, [], [])
                         )
                     value = self.values[i + 1].execute(scope, generator)
                     if value is None:
@@ -79,7 +79,7 @@ class Println(Instruction):
                         generator.addComment2("Final Str")
                         generator.addComment("===================")
                         self.printStr(
-                            generator, Value(format_str, True, Type.Str, [], [])
+                            scope, generator, Value(format_str, True, Type.Str, [], [])
                         )
             if isNone:
                 err = Error(
@@ -93,11 +93,13 @@ class Println(Instruction):
             generator.addPrintf("c", "10")
             generator.addPrintf("c", "13")
 
-    def printStr(self, generator: Generator, value: Value):
+    def printStr(self, scope: Scope, generator: Generator, value: Value):
+        generator.addExpression("P", "P", str(scope.size), "+")
         new_temp = generator.newTemp()
         generator.addExpression(new_temp, "P", "1", "+")
         generator.addSetStack(new_temp, value.getValue())
         generator.addCall("imprimir")
+        generator.addExpression("P", "P", str(scope.size), "-")
 
     def printPrimitive(self, scope: Scope, generator: Generator, value: Value):
         if value.getType() == Type.I64 or value.getType() == Type.Int:
@@ -119,7 +121,7 @@ class Println(Instruction):
             generator.addCall("printFalse")
             generator.addLabel(new_label)
         elif value.getType() == Type.Str or value.getType() == Type.String:
-            self.printStr(generator, value)
+            self.printStr(scope, generator, value)
         else:
             err = Error(
                 self.line,

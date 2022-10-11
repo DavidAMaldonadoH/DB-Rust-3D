@@ -24,8 +24,10 @@ class Sqrt(Expression):
             return
         new_temp = generator.newTemp()
         t1 = generator.newTemp()
+        generator.addExpression("P", "P", str(scope.size), "+")
         generator.addExpression(t1, "P", "1", "+")
         generator.addSetStack(t1, expr.getValue())
         generator.addCall("squareRoot")
         generator.addGetStack(new_temp, "P")
+        generator.addExpression("P", "P", str(scope.size), "-")
         return Value(new_temp, True, expr.getType(), [], [])

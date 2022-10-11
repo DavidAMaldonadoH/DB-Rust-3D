@@ -13,12 +13,15 @@ from expression.Sqrt import Sqrt
 from expression.ToString import ToString
 from instruction.Assignation import Assignation
 from instruction.Break import Break
+from instruction.Case import Case
 from instruction.Continue import Continue
 from instruction.Declaration import Declaration
+from instruction.Default import Default
 from instruction.For import For
 from instruction.FunctionDeclaration import FunctionDeclaration
 from instruction.If import If
 from instruction.Loop import Loop
+from instruction.Match import Match
 from instruction.Println import Println
 from instruction.Return import Return
 from instruction.Statement import Statement
@@ -60,6 +63,7 @@ def p_instruction(p):
     | asignation SEMICOLON
     | println SEMICOLON
     | if_st
+    | match
     | while
     | loop
     | for
@@ -160,6 +164,38 @@ def p_else_st(p):
         p[0] = None
 
 
+def p_match(p):
+    "match : RMATCH expression LCBRACKET cases default RCBRACKET"
+    p[0] = Match(p.lineno(1), p.lexpos(1), p[2], p[4], p[5])
+
+
+def p_cases(p):
+    "cases : cases case"
+    p[1].append(p[2])
+    p[0] = p[1]
+
+
+def p_cases_case(p):
+    "cases : case"
+    p[0] = [p[1]]
+
+
+def p_case(p):
+    """case : expressions_match ARROW statement
+    | expressions_match ARROW simple_instr COMMA"""
+    p[0] = Case(p.lineno(1), p.lexpos(1), p[1], p[3])
+
+
+def p_default(p):
+    """default : UNDERSCORE ARROW statement
+    | UNDERSCORE ARROW simple_instr COMMA
+    | empty"""
+    if p[1] == "_":
+        p[0] = Default(p.lineno(1), p.lexpos(1), p[3])
+    else:
+        p[0] = None
+
+
 def p_while(p):
     "while : RWHILE expression statement"
     p[0] = While(p.lineno(1), p.lexpos(1), p[2], p[3])
@@ -209,8 +245,39 @@ def p_return_2(p):
 
 
 def p_function(p):
-    """function : RFN ID LPAREN RPAREN statement"""
-    p[0] = FunctionDeclaration(p.lineno(1), p.lexpos(1), p[2], [], p[5], Type.Void)
+    """function : RFN ID LPAREN RPAREN statement
+    | RFN ID LPAREN args RPAREN statement"""
+    if p[4] != ")":
+        p[0] = FunctionDeclaration(
+            p.lineno(1), p.lexpos(1), p[2], p[4], p[6], Type.Void
+        )
+    else:
+        p[0] = FunctionDeclaration(p.lineno(1), p.lexpos(1), p[2], [], p[5], Type.Void)
+
+
+def p_function_return(p):
+    """function : RFN ID LPAREN RPAREN ARROW2 primitive_type statement
+    | RFN ID LPAREN args RPAREN ARROW2 primitive_type statement"""
+    if p[4] != ")":
+        p[0] = FunctionDeclaration(p.lineno(1), p.lexpos(1), p[2], p[4], p[8], p[7])
+    else:
+        p[0] = FunctionDeclaration(p.lineno(1), p.lexpos(1), p[2], [], p[7], p[6])
+
+
+def p_args_list(p):
+    "args : args COMMA arg"
+    p[1].append(p[3])
+    p[0] = p[1]
+
+
+def p_args_item(p):
+    "args : arg"
+    p[0] = [p[1]]
+
+
+def p_arg(p):
+    """arg : ID COLON primitive_type"""
+    p[0] = {"name": p[1], "type": p[3], "mut": False}
 
 
 # =========== Expresiones ===========
@@ -224,6 +291,17 @@ def p_expressions(p):
 
 def p_expressions_expression(p):
     "expressions : expression"
+    p[0] = [p[1]]
+
+
+def p_expressions_match(p):
+    "expressions_match : expressions_match PIPE expression"
+    p[1].append(p[3])
+    p[0] = p[1]
+
+
+def p_expressions_expression_match(p):
+    "expressions_match : expression"
     p[0] = [p[1]]
 
 
@@ -258,7 +336,8 @@ def p_expr_reference(p):
 
 def p_expr_selection(p):
     """expression : if_st
-    | loop"""
+    | loop
+    | match"""
     p[0] = p[1]
 
 

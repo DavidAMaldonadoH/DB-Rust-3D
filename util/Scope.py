@@ -1,5 +1,6 @@
 from typing import Optional
 from util.Error import Error, ERRORS_
+from util.Function import Function
 from util.Symbol import Symbol, SYMBOLS
 from util.Types import Type
 
@@ -10,6 +11,7 @@ class Scope:
         self.name = name
         self.size = 0 if father is None else father.size
         self.variables = dict()
+        self.functions = dict()
 
     def getGlobal(self):
         while self.father != None:
@@ -41,8 +43,8 @@ class Scope:
         SYMBOLS.append(
             {
                 "name": name,
-                "type": type.fullname,
-                "type2": "",
+                "type": "Variable",
+                "type2": type.fullname,
                 "scope": self.name,
                 "position": self.size,
                 "params": "",
@@ -51,3 +53,45 @@ class Scope:
         )
         self.size += 1
         return self.variables[name]
+
+    def getFunction(self, name: str) -> Function:
+        while True:
+            if name in self.functions:
+                return self.functions[name]
+            if self.anterior == None:
+                break
+            self = self.anterior
+        return None
+
+    def saveFunction(self, id: str, fn: Function, line: int, col: int):
+        if id in self.functions:
+            err = Error(
+                line,
+                col,
+                f"La función {id} ya existe.",
+                self.name,
+            )
+            ERRORS_.append(err)
+        self.functions[id] = fn
+        SYMBOLS.append(
+            {
+                "name": "return",
+                "type": "Variable",
+                "type2": fn.type.fullname,
+                "scope": fn.id,
+                "position": "0",
+                "params": "",
+                "size": "1",
+            }
+        )
+        SYMBOLS.append(
+            {
+                "name": id,
+                "type": "Funcion",
+                "type2": fn.type.fullname,
+                "scope": self.name,
+                "position": "-1",
+                "params": ",".join([p["name"] for p in fn.parameters]),
+                "size": str(fn.size),
+            }
+        )

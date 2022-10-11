@@ -22,8 +22,10 @@ class SimpleAccess(Expression):
             )
             ERRORS_.append(err)
             return
+        t1 = generator.newTemp()
+        generator.addExpression(t1, "P", str(var.position), "+")
         new_temp = generator.newTemp()
-        generator.addGetStack(new_temp, var.position)
+        generator.addGetStack(new_temp, t1)
         if var.type == Type.Bool:
             true_label = generator.newLabel()
             false_label = generator.newLabel()

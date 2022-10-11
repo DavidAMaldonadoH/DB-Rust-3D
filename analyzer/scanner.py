@@ -32,6 +32,9 @@ tokens = [
     "AMPERSAND",
     "LCBRACKET",
     "RCBRACKET",
+    "PIPE",
+    "ARROW",
+    "ARROW2",
 ]
 
 reserved = {
@@ -51,6 +54,8 @@ reserved = {
     "as": "RAS",
     "if": "RIF",
     "else": "RELSE",
+    "match": "RMATCH",
+    "_": "UNDERSCORE",
     "while": "RWHILE",
     "loop": "RLOOP",
     "for": "RFOR",
@@ -104,9 +109,9 @@ t_RCBRACKET = r"\}"
 # t_RBRACKET = r"\]"
 # t_DCOLON = r"\:\:"
 t_AMPERSAND = r"\&"
-# t_ARROW = r"=>"
-# t_ARROW2 = r"->"
-# t_PIPE = r"\|"
+t_ARROW = r"=>"
+t_ARROW2 = r"->"
+t_PIPE = r"\|"
 
 
 def t_FLOAT(t):

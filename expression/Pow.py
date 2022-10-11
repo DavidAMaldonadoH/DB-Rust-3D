@@ -49,6 +49,7 @@ class Pow(Expression):
             (left_op.getType() == Type.Int or left_op.getType() == Type.I64)
             and (right_op.getType() == Type.Int or right_op.getType() == Type.I64)
         ) or (left_op.getType() == Type.F64 and right_op.getType() == Type.F64):
+            generator.addExpression("P", "P", str(scope.size), "+")
             new_temp = generator.newTemp()
             t1 = generator.newTemp()
             generator.addExpression(t1, "P", "1", "+")
@@ -58,6 +59,7 @@ class Pow(Expression):
             generator.addSetStack(t2, right_op.getValue())
             generator.addCall("power")
             generator.addGetStack(new_temp, "P")
+            generator.addExpression("P", "P", str(scope.size), "-")
             return Value(new_temp, True, self.type, [], [])
         else:
             err = Error(

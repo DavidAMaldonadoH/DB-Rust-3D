@@ -46,6 +46,7 @@ class Operation(Expression):
                 ERRORS_.append(err)
                 return
             if dominant_type == Type.String:
+                generator.addExpression("P", "P", str(scope.size), "+")
                 t1 = generator.newTemp()
                 t2 = generator.newTemp()
                 generator.addExpression(t1, "P", "1", "+")
@@ -54,6 +55,7 @@ class Operation(Expression):
                 generator.addSetStack(t2, right_op.value)
                 generator.addCall("concatenate")
                 generator.addGetStack(new_temp, "P")
+                generator.addExpression("P", "P", str(scope.size), "-")
             else:
                 generator.addExpression(
                     new_temp, left_op.value, right_op.value, self.operator
@@ -111,7 +113,6 @@ class Operation(Expression):
             generator.addLabel(label3)
             return Value(new_temp, True, dominant_type, "", "")
         elif self.operator == "%":
-            new_temp = generator.newTemp()
             dominant_type = RESTO_TYPE[left_op.type.value][right_op.type.value]
             if dominant_type == Type.Null:
                 err = Error(
@@ -122,6 +123,7 @@ class Operation(Expression):
                 )
                 ERRORS_.append(err)
                 return
+            new_temp = generator.newTemp()
             label1 = generator.newLabel()
             label2 = generator.newLabel()
             label3 = generator.newLabel()
@@ -132,6 +134,7 @@ class Operation(Expression):
             generator.addAsignation(new_temp, "0")
             generator.addGoto(label3)
             generator.addLabel(label2)
+            generator.addExpression("P", "P", str(scope.size), "+")
             t1 = generator.newTemp()
             generator.addExpression(t1, "P", "1", "+")
             generator.addSetStack(t1, left_op.value)
@@ -149,6 +152,7 @@ class Operation(Expression):
                     new_temp, left_op.value, right_op.value, self.operator
                 )
             generator.addLabel(label3)
+            generator.addExpression("P", "P", str(scope.size), "-")
             return Value(new_temp, True, dominant_type, "", "")
         else:
             dominant_type = REL_TYPE[left_op.type.value][right_op.type.value]

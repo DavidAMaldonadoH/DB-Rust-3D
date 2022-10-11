@@ -46,4 +46,6 @@ class Assignation(Instruction):
             )
             ERRORS_.append(err)
             return
-        generator.addSetStack(var.getPosition(), value_.getValue())
+        new_temp = generator.newTemp()
+        generator.addExpression(new_temp, "P", str(var.position), "+")
+        generator.addSetStack(new_temp, value_.getValue())
