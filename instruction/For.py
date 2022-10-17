@@ -40,7 +40,7 @@ class For(Instruction):
             )
             declaration.execute(scope, generator)
             var = scope.getVariable(self.id)
-            generator.addAsignation(new_temp, "1")
+            generator.addAssignation(new_temp, "1")
             generator.addGetStack(new_temp2, str(var.getPosition()))
             generator.addLabel(label_start)
             generator.addIf(new_temp2, end.value, "==", label_end)

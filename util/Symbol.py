@@ -2,11 +2,21 @@ from util.Types import Type
 
 
 class Symbol:
-    def __init__(self, id: str, type: Type, position: int, mutable: bool) -> None:
+    def __init__(
+        self,
+        id: str,
+        type: Type,
+        type2: str,
+        position: int,
+        mutable: bool,
+        dimensions: list[int],
+    ) -> None:
         self.id = id
         self.type = type
+        self.type2 = type2
         self.position = position
         self.mutable = mutable
+        self.dimensions = dimensions
 
     def isMutable(self) -> bool:
         return self.mutable
@@ -14,8 +24,14 @@ class Symbol:
     def getType(self) -> Type:
         return self.type
 
+    def getType2(self) -> str:
+        return self.type2
+
     def getPosition(self) -> int:
         return self.position
+
+    def getDimensions(self) -> list[int]:
+        return self.dimensions
 
 
 SYMBOLS = []

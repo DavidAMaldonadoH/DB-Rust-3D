@@ -28,7 +28,14 @@ class Scope:
         return None
 
     def saveVariable(
-        self, name: str, type: Type, mutable: bool, line: int, col: int
+        self,
+        name: str,
+        type: Type,
+        type2: str,
+        mutable: bool,
+        dimensions: list[int],
+        line: int,
+        col: int,
     ) -> Symbol:
         if name in self.variables:
             err = Error(
@@ -39,16 +46,19 @@ class Scope:
             )
             ERRORS_.append(err)
             return self.variables[name]
-        self.variables[name] = Symbol(name, type, self.size, mutable)
+        self.variables[name] = Symbol(name, type, type2, self.size, mutable, dimensions)
+        var_size = (
+            "1" if len(dimensions) == 0 else "*".join([str(d) for d in dimensions])
+        )
         SYMBOLS.append(
             {
                 "name": name,
-                "type": "Variable",
+                "type": type2,
                 "type2": type.fullname,
                 "scope": self.name,
                 "position": self.size,
                 "params": "",
-                "size": "1",
+                "size": var_size,
             }
         )
         self.size += 1

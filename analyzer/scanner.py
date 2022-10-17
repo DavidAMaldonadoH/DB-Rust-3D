@@ -24,6 +24,8 @@ tokens = [
     "NEQUALS",
     "LPAREN",
     "RPAREN",
+    "LBRACKET",
+    "RBRACKET",
     "COMMA",
     "DOT",
     "COLON",
@@ -105,8 +107,8 @@ t_COLON = r"\:"
 t_SEMICOLON = r"\;"
 t_LCBRACKET = r"\{"
 t_RCBRACKET = r"\}"
-# t_LBRACKET = r"\["
-# t_RBRACKET = r"\]"
+t_LBRACKET = r"\["
+t_RBRACKET = r"\]"
 # t_DCOLON = r"\:\:"
 t_AMPERSAND = r"\&"
 t_ARROW = r"=>"

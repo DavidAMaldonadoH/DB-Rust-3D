@@ -44,6 +44,7 @@ class MainWindow(QMainWindow):
         generator.addPower()
         generator.addMathError()
         generator.addConcatenate()
+        generator.addOutOfBounds()
 
         for node in ast:
             node.execute(g_scope, generator)

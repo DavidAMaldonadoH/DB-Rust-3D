@@ -40,7 +40,7 @@ class Literal(Expression):
                 new_temp = generator.newTemp()
                 generator.addComment("===================")
                 generator.addComment2("Inicio Str")
-                generator.addAsignation(new_temp, "H")
+                generator.addAssignation(new_temp, "H")
                 value = new_temp
                 for char in self.value:
                     generator.addSetHeap("H", str(ord(char)))

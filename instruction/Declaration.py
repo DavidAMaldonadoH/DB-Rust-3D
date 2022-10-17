@@ -23,8 +23,23 @@ class Declaration(Instruction):
         self.type = type
         self.value = value
 
+    def getNestedType(self, type: dict, arr: list):
+        if isinstance(type["type"], dict):
+            arr.append(type["size"])
+            self.getNestedType(type["type"], arr)
+        else:
+            arr.append(type["size"])
+            arr.append(type["type"])
+
     def execute(self, scope: Scope, generator: Generator) -> any:
         result: Value = self.value.execute(scope, generator)
+        sizes_dec = []
+        sizes_exp = []
+        if isinstance(self.type, dict):
+            self.getNestedType(self.type, sizes_dec)
+            self.type = sizes_dec.pop()
+            self.getNestedType(result.type, sizes_exp)
+            result.type = sizes_exp.pop()
         if result.type == Type.Int and (
             self.type == Type.I64 or self.type == Type.Usize
         ):
@@ -38,9 +53,29 @@ class Declaration(Instruction):
             )
             ERRORS_.append(err)
             return
-        variable: Symbol = scope.saveVariable(
-            self.id, self.type, self.is_mutable, self.line, self.column
-        )
+        variable: Symbol
+        if len(sizes_dec) > 0 and len(sizes_exp) > 0:
+            if all(sizes_dec[i] == sizes_exp[i] for i in range(len(sizes_dec))):
+                variable = scope.saveVariable(
+                    self.id,
+                    self.type,
+                    "Arreglo",
+                    self.is_mutable,
+                    sizes_dec,
+                    self.line,
+                    self.column,
+                )
+        else:
+
+            variable = scope.saveVariable(
+                self.id,
+                self.type,
+                "Variable",
+                self.is_mutable,
+                [],
+                self.line,
+                self.column,
+            )
         new_temp = generator.newTemp()
         generator.addExpression(new_temp, "P", str(variable.position), "+")
         if result.type == Type.Bool:

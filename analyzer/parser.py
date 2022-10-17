@@ -2,7 +2,9 @@ import ply.yacc as yacc
 
 from analyzer.scanner import tokens
 from expression.Abs import Abs
+from expression.ArrayAccess import ArrayAccess
 from expression.Cast import Cast
+from expression.CreateArray import CreateArray
 from expression.Logic import Logic
 from expression.Operation import Operation
 from expression.Literal import Literal
@@ -27,6 +29,7 @@ from instruction.Println import Println
 from instruction.Return import Return
 from instruction.Statement import Statement
 from instruction.While import While
+from util.Expression import Expression
 from util.Types import Type
 
 
@@ -39,7 +42,7 @@ precedence = (
     ("left", "TIMES", "DIVIDE", "MODULE"),
     ("left", "RAS"),
     ("right", "UMINUS", "NOT"),
-    ("left", "DOT", "PARENS"),
+    ("left", "DOT", "PARENS", "LBRACKET", "RBRACKET"),
 )
 
 
@@ -131,6 +134,12 @@ def p_primitive_type(p):
         p[0] = Type.Usize
 
 
+def p_array_type(p):
+    """array_type : LBRACKET primitive_type SEMICOLON INT RBRACKET
+    | LBRACKET array_type SEMICOLON INT RBRACKET"""
+    p[0] = {"type": p[2], "size": p[4]}
+
+
 def p_declaration_mut(p):
     "declaration : RLET RMUT ID COLON primitive_type EQUAL expression"
     p[0] = Declaration(p.lineno(1), p.lexpos(1), True, p[3], p[5], p[7])
@@ -138,6 +147,16 @@ def p_declaration_mut(p):
 
 def p_declaration(p):
     "declaration : RLET ID COLON primitive_type EQUAL expression"
+    p[0] = Declaration(p.lineno(1), p.lexpos(1), False, p[2], p[4], p[6])
+
+
+def p_declaration_mut_array(p):
+    "declaration : RLET RMUT ID COLON array_type EQUAL expression"
+    p[0] = Declaration(p.lineno(1), p.lexpos(1), True, p[3], p[5], p[7])
+
+
+def p_declaration_array(p):
+    "declaration : RLET ID COLON array_type EQUAL expression"
     p[0] = Declaration(p.lineno(1), p.lexpos(1), False, p[2], p[4], p[6])
 
 
@@ -375,6 +394,31 @@ def p_expr_function(p):
         p[0] = FunctionCall(p.lineno(1), p.lexpos(1), p[1], [])
     else:
         p[0] = FunctionCall(p.lineno(1), p.lexpos(1), p[1], p[3])
+
+
+def p_create_array(p):
+    """expression : LBRACKET expression SEMICOLON INT RBRACKET
+    | LBRACKET expressions RBRACKET"""
+    if isinstance(p[2], Expression):
+        p[0] = CreateArray(p.lineno(1), p.lexpos(1), None, p[2], p[4])
+    else:
+        p[0] = CreateArray(p.lineno(1), p.lexpos(1), p[2], None, 0)
+
+
+def p_array_access(p):
+    "expression : lref"
+    p[0] = ArrayAccess(p.lineno(1), p.lexpos(1), p[1])
+
+
+def p_lref(p):
+    "lref : lref LBRACKET expression RBRACKET"
+    p[1].append(p[3])
+    p[0] = p[1]
+
+
+def p_lref_2(p):
+    "lref : ID LBRACKET expression RBRACKET"
+    p[0] = [p[1], p[3]]
 
 
 def p_expr_uminus(p):

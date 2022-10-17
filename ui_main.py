@@ -615,11 +615,11 @@ class Ui_MainWindow(object):
         )
         ___qtablewidgetitem5 = self.table_simbolos.horizontalHeaderItem(5)
         ___qtablewidgetitem5.setText(
-            QCoreApplication.translate("MainWindow", "Parametros", None)
+            QCoreApplication.translate("MainWindow", "Parámetros", None)
         )
         ___qtablewidgetitem20 = self.table_simbolos.horizontalHeaderItem(6)
         ___qtablewidgetitem20.setText(
-            QCoreApplication.translate("MainWindow", "Tamano", None)
+            QCoreApplication.translate("MainWindow", "Tamaño", None)
         )
         self.label_errores.setText(
             QCoreApplication.translate("MainWindow", "Tabla de Errores", None)

@@ -99,7 +99,7 @@ class Operation(Expression):
             generator.addGoto(label2)
             generator.addLabel(label1)
             generator.addCall("mathError")
-            generator.addAsignation(new_temp, "0")
+            generator.addAssignation(new_temp, "0")
             generator.addGoto(label3)
             generator.addLabel(label2)
             if dominant_type == Type.I64 or dominant_type == Type.Int:
@@ -131,7 +131,7 @@ class Operation(Expression):
             generator.addGoto(label2)
             generator.addLabel(label1)
             generator.addCall("mathError")
-            generator.addAsignation(new_temp, "0")
+            generator.addAssignation(new_temp, "0")
             generator.addGoto(label3)
             generator.addLabel(label2)
             generator.addExpression("P", "P", str(scope.size), "+")

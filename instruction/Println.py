@@ -47,7 +47,7 @@ class Println(Instruction):
                         new_temp = generator.newTemp()
                         generator.addComment("===================")
                         generator.addComment2("Inicio Str")
-                        generator.addAsignation(new_temp, "H")
+                        generator.addAssignation(new_temp, "H")
                         format_str = new_temp
                         for char in field:
                             generator.addSetHeap("H", str(ord(char)))
@@ -69,7 +69,7 @@ class Println(Instruction):
                         new_temp = generator.newTemp()
                         generator.addComment("===================")
                         generator.addComment2("Inicio Str")
-                        generator.addAsignation(new_temp, "H")
+                        generator.addAssignation(new_temp, "H")
                         format_str = new_temp
                         for char in field:
                             generator.addSetHeap("H", str(ord(char)))

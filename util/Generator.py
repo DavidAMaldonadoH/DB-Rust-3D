@@ -41,7 +41,7 @@ class Generator:
     def addExpression(self, target: str, left: str, right: str, operator: str) -> None:
         self.code.append(f"{target} = {left} {operator} {right};")
 
-    def addAsignation(self, target: str, value: str) -> None:
+    def addAssignation(self, target: str, value: str) -> None:
         self.code.append(f"{target} = {value};")
 
     def addPrintf(self, typePrint: str, value: str) -> None:
@@ -140,7 +140,7 @@ class Generator:
         self.addGoto(label2)
         t3 = self.newTemp()
         self.addLabel(label1)
-        self.addAsignation(t3, "-1")
+        self.addAssignation(t3, "-1")
         self.addExpression(t2, t2, t3, "*")
         self.addLabel(label2)
         self.addSetStack("P", t2)
@@ -163,10 +163,10 @@ class Generator:
         label3 = self.newLabel()
         self.addExpression(t1, "P", "1", "+")
         self.addGetStack(t2, t1)
-        self.addAsignation(t4, "1")
+        self.addAssignation(t4, "1")
         self.addExpression(t4, t4, "10000", "/")
         self.addExpression(t3, t2, "2", "/")
-        self.addAsignation(t8, t3)
+        self.addAssignation(t8, t3)
         self.addExpression(t5, t3, t3, "*")
         self.addExpression(t5, t5, t2, "-")
         self.addExpression(t6, "2", t3, "*")
@@ -200,7 +200,7 @@ class Generator:
         self.addGetStack(t2, t1)
         self.addExpression(t3, "P", "2", "+")
         self.addGetStack(t4, t3)
-        self.addAsignation(t5, "1")
+        self.addAssignation(t5, "1")
         self.addLabel(label1)
         self.addIf(t4, "0", "==", label2)
         self.addExpression(t5, t5, t2, "*")
@@ -228,7 +228,7 @@ class Generator:
     def addConcatenate(self):
         self.code.append("void concatenate() {")
         new_temp = self.newTemp()
-        self.addAsignation(new_temp, "H")
+        self.addAssignation(new_temp, "H")
         t1 = self.newTemp()
         t2 = self.newTemp()
         t3 = self.newTemp()
@@ -259,5 +259,21 @@ class Generator:
         self.addSetHeap("H", "-1")
         self.addExpression("H", "H", "1", "+")
         self.addSetStack("P", new_temp)
+        self.code.append("return;")
+        self.code.append("}\n")
+
+    def addOutOfBounds(self):
+        self.code.append("void outOfBounds() {")
+        self.addPrintf("c", str(ord("O")))
+        self.addPrintf("c", str(ord("u")))
+        self.addPrintf("c", str(ord("t")))
+        self.addPrintf("c", str(ord("O")))
+        self.addPrintf("c", str(ord("f")))
+        self.addPrintf("c", str(ord("B")))
+        self.addPrintf("c", str(ord("o")))
+        self.addPrintf("c", str(ord("u")))
+        self.addPrintf("c", str(ord("n")))
+        self.addPrintf("c", str(ord("d")))
+        self.addPrintf("c", str(ord("s")))
         self.code.append("return;")
         self.code.append("}\n")

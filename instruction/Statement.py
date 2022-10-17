@@ -25,14 +25,15 @@ class Statement(Instruction):
             new_scope.saveVariable(
                 parameter["name"],
                 parameter["type"],
+                "Variable",
                 parameter["mut"],
+                [],
                 self.line,
                 self.column,
             )
         for instruction in self.code:
             retorno = instruction.execute(new_scope, generator)
         if scope.size < new_scope.size:
-            # generator.addExpression("P", "P", str(new_scope.size - scope.size), "-")
             self.size = new_scope.size - scope.size
         if retorno is not None:
             return retorno
