@@ -26,6 +26,14 @@ class SimpleAccess(Expression):
         generator.addExpression(t1, "P", str(var.position), "+")
         new_temp = generator.newTemp()
         generator.addGetStack(new_temp, t1)
+        if var.type2 == "Arreglo":
+            array_type = {}
+            for i in range(len(var.dimensions) - 1, -1, -1):
+                if i == len(var.dimensions) - 1:
+                    array_type = {"size": var.dimensions[i], "type": var.type}
+                else:
+                    array_type = {"size": var.dimensions[i], "type": array_type}
+            return Value(new_temp, True, array_type, [], [])
         if var.type == Type.Bool:
             true_label = generator.newLabel()
             false_label = generator.newLabel()
@@ -38,4 +46,4 @@ class SimpleAccess(Expression):
                 [true_label],
                 [false_label],
             )
-        return Value(new_temp, True, var.type, [""], [""])
+        return Value(new_temp, True, var.type, [], [])

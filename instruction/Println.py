@@ -13,6 +13,13 @@ class Println(Instruction):
         super().__init__(line, column)
         self.values = values
 
+    def getNestedSize(self, type: dict, arr: list):
+        if isinstance(type["type"], dict):
+            arr.append(type["size"])
+            self.getNestedSize(type["type"], arr)
+        else:
+            arr.append(type["size"])
+
     def execute(self, scope: Scope, generator: Generator) -> any:
         if len(self.values) == 1:
             format_str = self.values[0].execute(scope, generator)
@@ -63,7 +70,10 @@ class Println(Instruction):
                     if value is None:
                         isNone = True
                         break
-                    self.printPrimitive(scope, generator, value)
+                    if isinstance(value.type, dict):
+                        self.printLists(scope, generator, value, value.type)
+                    else:
+                        self.printPrimitive(scope, generator, value)
                 else:
                     if field != "":
                         new_temp = generator.newTemp()
@@ -131,3 +141,27 @@ class Println(Instruction):
             )
             ERRORS_.append(err)
             return
+
+    def printLists(self, scope: Scope, generator: Generator, value: Value, type: any):
+        if isinstance(type.get("type"), dict):
+            generator.addPrintf("c", str(ord("[")))
+            for i in range(type["size"]):
+                self.printLists(scope, generator, value, type["type"])
+                if i != type["size"] - 1:
+                    generator.addPrintf("c", str(ord(",")))
+            generator.addPrintf("c", str(ord("]")))
+        else:
+            new_temp = generator.newTemp()
+            generator.addPrintf("c", str(ord("[")))
+            for i in range(type["size"]):
+                generator.addGetHeap(new_temp, value.value)
+                val = Value(
+                    new_temp, True, type["type"], value.true_label, value.false_label
+                )
+                if i != type["size"] - 1:
+                    self.printPrimitive(scope, generator, val)
+                    generator.addPrintf("c", str(ord(",")))
+                else:
+                    self.printPrimitive(scope, generator, val)
+                generator.addExpression(value.value, value.value, "1", "+")
+            generator.addPrintf("c", str(ord("]")))
