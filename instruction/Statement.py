@@ -14,6 +14,14 @@ class Statement(Instruction):
     def setName(self, name: str):
         self.name = name
 
+    def getNestedType(self, type: dict, arr: list):
+        if isinstance(type["type"], dict):
+            arr.append(type["size"])
+            self.getNestedType(type["type"], arr)
+        else:
+            arr.append(type["size"])
+            arr.append(type["type"])
+
     def execute(self, scope: Scope, generator: Generator) -> any:
         new_scope = Scope(scope, self.name)
         new_scope.size += self.size
@@ -22,15 +30,29 @@ class Statement(Instruction):
             generator.addExpression(new_temp, "P", str(new_scope.size), "+")
             new_temp2 = generator.newTemp()
             generator.addGetStack(new_temp2, new_temp)
-            new_scope.saveVariable(
-                parameter["name"],
-                parameter["type"],
-                "Variable",
-                parameter["mut"],
-                [],
-                self.line,
-                self.column,
-            )
+            if isinstance(parameter["type"], dict):
+                sizes = []
+                self.getNestedType(parameter["type"], sizes)
+                parameter["type"] = sizes.pop()
+                new_scope.saveVariable(
+                    parameter["name"],
+                    parameter["type"],
+                    "Arreglo",
+                    parameter["mut"],
+                    sizes,
+                    self.line,
+                    self.column,
+                )
+            else:
+                new_scope.saveVariable(
+                    parameter["name"],
+                    parameter["type"],
+                    "Variable",
+                    parameter["mut"],
+                    [],
+                    self.line,
+                    self.column,
+                )
         for instruction in self.code:
             retorno = instruction.execute(new_scope, generator)
         if scope.size < new_scope.size:

@@ -37,6 +37,7 @@ tokens = [
     "PIPE",
     "ARROW",
     "ARROW2",
+    "DCOLON",
 ]
 
 reserved = {
@@ -71,6 +72,7 @@ reserved = {
     "sqrt": "RSQRT",
     "pow": "RPOW",
     "powf": "RPOWF",
+    "len": "RLEN",
 }
 
 tokens += list(reserved.values())
@@ -109,7 +111,7 @@ t_LCBRACKET = r"\{"
 t_RCBRACKET = r"\}"
 t_LBRACKET = r"\["
 t_RBRACKET = r"\]"
-# t_DCOLON = r"\:\:"
+t_DCOLON = r"\:\:"
 t_AMPERSAND = r"\&"
 t_ARROW = r"=>"
 t_ARROW2 = r"->"

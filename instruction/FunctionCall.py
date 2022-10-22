@@ -13,6 +13,14 @@ class FunctionCall(Instruction):
         self.name = name
         self.args = args
 
+    def getNestedType(self, type: dict, arr: list):
+        if isinstance(type["type"], dict):
+            arr.append(type["size"])
+            self.getNestedType(type["type"], arr)
+        else:
+            arr.append(type["size"])
+            arr.append(type["type"])
+
     def execute(self, scope: Scope, generator: Generator) -> any:
         fn = scope.getFunction(self.name)
         if fn is None:
@@ -37,6 +45,10 @@ class FunctionCall(Instruction):
         for param, arg in zip(fn.parameters, self.args):
             val = arg["value"].execute(scope, generator)
             values.append(val)
+            if isinstance(val.type, dict):
+                sizes = []
+                self.getNestedType(val.type, sizes)
+                val.type = sizes.pop()
             if val.type == Type.Int and (
                 param["type"] == Type.I64 or param["type"] == Type.Usize
             ):

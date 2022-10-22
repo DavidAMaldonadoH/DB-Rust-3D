@@ -5,6 +5,7 @@ from expression.Abs import Abs
 from expression.ArrayAccess import ArrayAccess
 from expression.Cast import Cast
 from expression.CreateArray import CreateArray
+from expression.Len import Len
 from expression.Logic import Logic
 from expression.Operation import Operation
 from expression.Literal import Literal
@@ -25,6 +26,7 @@ from instruction.FunctionDeclaration import FunctionDeclaration
 from instruction.If import If
 from instruction.Loop import Loop
 from instruction.Match import Match
+from instruction.NestedAssignation import NestedAssignation
 from instruction.Println import Println
 from instruction.Return import Return
 from instruction.Statement import Statement
@@ -41,7 +43,7 @@ precedence = (
     ("left", "PLUS", "MINUS"),
     ("left", "TIMES", "DIVIDE", "MODULE"),
     ("left", "RAS"),
-    ("right", "UMINUS", "NOT"),
+    ("right", "UMINUS", "NOT", "AMPERSAND"),
     ("left", "DOT", "PARENS", "LBRACKET", "RBRACKET"),
 )
 
@@ -163,6 +165,11 @@ def p_declaration_array(p):
 def p_asignation(p):
     "asignation : ID EQUAL expression"
     p[0] = Assignation(p.lineno(1), p.lexpos(1), p[1], p[3])
+
+
+def p_nested_asignation(p):
+    "asignation : lref EQUAL expression"
+    p[0] = NestedAssignation(p.lineno(1), p.lexpos(1), p[1], p[3])
 
 
 def p_println(p):
@@ -297,8 +304,33 @@ def p_args_item(p):
 
 
 def p_arg(p):
-    """arg : ID COLON primitive_type"""
-    p[0] = {"name": p[1], "type": p[3], "mut": False}
+    """arg : ID COLON primitive_type
+    | ID COLON AMPERSAND RMUT array_type
+    | ID COLON AMPERSAND RMUT LBRACKET primitive_type RBRACKET"""
+    if p[3] == "&":
+        if p[5] == "[":
+            p[0] = {"name": p[1], "type": {"type": p[6], "size": -1}, "mut": True}
+        else:
+            p[0] = {"name": p[1], "type": p[5], "mut": True}
+    else:
+        p[0] = {"name": p[1], "type": p[3], "mut": False}
+
+
+def p_arg_2(p):
+    """arg : RMUT ID COLON array_type
+    | RMUT ID COLON LBRACKET primitive_type RBRACKET
+    | RMUT ID COLON AMPERSAND array_type
+    | RMUT ID COLON AMPERSAND LBRACKET primitive_type RBRACKET"""
+    if p[4] == "&":
+        if p[5] == "[":
+            p[0] = {"name": p[2], "type": {"type": p[6], "size": -1}, "mut": True}
+        else:
+            p[0] = {"name": p[2], "type": p[5], "mut": True}
+    else:
+        if p[4] == "[":
+            p[0] = {"name": p[2], "type": {"type": p[5], "size": -1}, "mut": True}
+        else:
+            p[0] = {"name": p[2], "type": p[4], "mut": True}
 
 
 def p_function_call(p):
@@ -322,8 +354,16 @@ def p_params_item(p):
 
 
 def p_param(p):
-    """param : expression"""
-    p[0] = {"value": p[1], "mut": False}
+    """param : expression
+    | AMPERSAND RMUT expression
+    | AMPERSAND expression"""
+    if p[1] == "&":
+        if p[2] == "mut":
+            p[0] = {"value": p[3], "mut": True}
+        else:
+            p[0] = {"value": p[2], "mut": False}
+    else:
+        p[0] = {"value": p[1], "mut": False}
 
 
 # =========== Expresiones ===========
@@ -367,12 +407,12 @@ def p_expr_sqrt(p):
 
 
 def p_expr_pow(p):
-    """expression : RPOW LPAREN expression COMMA expression RPAREN
-    | RPOWF LPAREN expression COMMA expression RPAREN"""
-    if p[1] == "pow":
-        p[0] = Pow(p.lineno(1), p.lexpos(1), p[3], p[5], Type.I64)
+    """expression : RINT DCOLON RPOW LPAREN expression COMMA expression RPAREN
+    | RFLOAT DCOLON RPOWF LPAREN expression COMMA expression RPAREN"""
+    if p[3] == "pow":
+        p[0] = Pow(p.lineno(1), p.lexpos(1), p[5], p[7], Type.I64)
     else:
-        p[0] = Pow(p.lineno(1), p.lexpos(1), p[3], p[5], Type.F64)
+        p[0] = Pow(p.lineno(1), p.lexpos(1), p[5], p[7], Type.F64)
 
 
 def p_expr_reference(p):
@@ -414,6 +454,11 @@ def p_lref(p):
     "lref : lref LBRACKET expression RBRACKET"
     p[1].append(p[3])
     p[0] = p[1]
+
+
+def p_vector_func(p):
+    "expression : expression DOT RLEN LPAREN RPAREN"
+    p[0] = Len(p.lineno(1), p.lexpos(1), p[1])
 
 
 def p_lref_2(p):

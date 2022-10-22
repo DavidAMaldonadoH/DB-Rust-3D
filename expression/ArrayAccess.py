@@ -47,7 +47,9 @@ class ArrayAccess(Expression):
                     ERRORS_.append(err)
                     return
             t1 = generator.newTemp()
-            generator.addGetStack(t1, str(var.getPosition()))
+            t4 = generator.newTemp()
+            generator.addExpression(t4, "P", str(var.position), "+")
+            generator.addGetStack(t1, t4)
             t2 = generator.newTemp()
             generator.addExpression(t2, t1, aux, "+")
             t3 = generator.newTemp()
