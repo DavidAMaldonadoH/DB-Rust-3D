@@ -168,7 +168,26 @@ class Operation(Expression):
             true_label = generator.newLabel()
             false_label = generator.newLabel()
 
-            generator.addIf(left_op.value, right_op.value, self.operator, true_label)
-            generator.addGoto(false_label)
+            if (left_op.type == Type.Str or left_op.type == Type.String) or (
+                right_op.type == Type.Str or right_op.type == Type.String
+            ):
+                generator.addExpression("P", "P", str(scope.size), "+")
+                t1 = generator.newTemp()
+                t2 = generator.newTemp()
+                t3 = generator.newTemp()
+                generator.addExpression(t1, "P", "1", "+")
+                generator.addSetStack(t1, left_op.value)
+                generator.addExpression(t2, "P", "2", "+")
+                generator.addSetStack(t2, right_op.value)
+                generator.addCall("compareStrings")
+                generator.addGetStack(t3, "P")
+                generator.addExpression("P", "P", str(scope.size), "-")
+                generator.addIf(t3, "1", "==", true_label)
+                generator.addGoto(false_label)
+            else:
+                generator.addIf(
+                    left_op.value, right_op.value, self.operator, true_label
+                )
+                generator.addGoto(false_label)
 
             return Value("", False, Type.Bool, [true_label], [false_label])
